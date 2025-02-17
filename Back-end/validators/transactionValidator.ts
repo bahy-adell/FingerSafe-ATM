@@ -1,8 +1,10 @@
-import {check } from "express-validator";
+import {check, param } from "express-validator";//bahy
 import validatorMiddleware from "./validatorMiddleware";
 export const transactionValidationRules = [
-  check('userId').isMongoId().withMessage('Invalid userId'),
-  check('receiverId').isMongoId().withMessage('Invalid receiverId'),
+  param('id').isMongoId().withMessage('Invalid userId'),
+  check('username').optional()
+  .isString()
+  .withMessage('Invalid receiver username'), 
   check('amount').isNumeric().withMessage('Amount must be numeric and greater than 0'),
   validatorMiddleware
 ];

@@ -5,7 +5,7 @@ export interface users extends Document{
     email: string;
     password: string;
     name: string;
-    username: string;  
+    username: string;  //bahy
     fingerId: number;
     role: Role;
     active: boolean;

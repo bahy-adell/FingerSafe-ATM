@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { transactions } from '../Interfaces/transactionInterface';
-
+//bahy
 const transactionSchema: Schema = new Schema<transactions>({
   userId: { type:  Schema.Types.ObjectId, ref: "User", required: true },
   type: { type: String, enum: ["deposit", "withdraw", "transfer"], required: true },

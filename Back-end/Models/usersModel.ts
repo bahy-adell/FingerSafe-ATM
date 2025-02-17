@@ -15,7 +15,7 @@ const usersSchema:Schema = new Schema<users>({
     password: { type: String, required: true },
     role: { type: String, enum: ["manager", "admin", "user"], default: "user" },
     active: { type: Boolean, default: true },
-    username: { type: String, required: true, unique: true },
+    username: { type: String, required: true, unique: true },//bahy 
     fingerId: { type: Number, unique:true,required: true },
     phoneNum: { type: String, required: true,unique: true },
     IBAN: { type: String,unique:true, required: true },
