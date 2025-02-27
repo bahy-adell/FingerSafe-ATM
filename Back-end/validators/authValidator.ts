@@ -1,47 +1,55 @@
-import { check } from "express-validator";
+import { check ,body} from "express-validator";
 import  validatorMiddleware from './validatorMiddleware';
+import usersModel from '../Models/usersModel';
+import moment from "moment";
+
 export const signUpValidation = [
   check("name")
     .notEmpty().withMessage("Name is required")
     .trim()
-    .isLength({ min: 3 }).withMessage("Name must be at least 3 characters"),
+    .isLength({ min: 4 ,max: 16 }).withMessage("Name must be at least 4 characters"),
 
   check("email")
     .notEmpty().withMessage("Email is required")
     .isEmail().withMessage("Invalid email format")
-    .normalizeEmail(),
+    .custom(async (val: string) => {
+      const user = await usersModel.findOne({ email: val });
+      if (user) { throw new Error(`email is already exist`) }
+      return true;
+    }),
 
   check("password")
     .notEmpty().withMessage("Password is required")
-    .isLength({  min: 6, max: 6  }).withMessage("Password must be 6 numbers"),  
+    .isLength({  min: 6, max: 6  }).withMessage("Password  must be 6 "),  
 
-  check("username")
-    .notEmpty().withMessage("Username is required")
-    .trim()
-    .isAlphanumeric().withMessage("Username must be alphanumeric"),
+    body('confirmPassword')
+        .custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new Error('Passwords do not match');
+            }
+            return true;
+        }),
 
   check("phoneNum")
     .notEmpty().withMessage("Phone number is required")
-    .isMobilePhone("any").withMessage("Invalid phone number"),
-
-  check("IBAN")
-    .notEmpty().withMessage("IBAN is required")
-    .isIBAN().withMessage("Invalid IBAN format"),  
-
-  check("cardNum")
-    .notEmpty().withMessage("Card number is required")
-    .isCreditCard().withMessage("Invalid card number"), 
-
-  check("cvv")
-    .notEmpty().withMessage("CVV is required")
-    .isLength({ min: 3, max: 4 }).withMessage("CVV must be 3 or 4 digits")
-    .isNumeric().withMessage("CVV must be numeric"),
+    .isMobilePhone("ar-EG").withMessage("Invalid phone number"),
 
   check("nationalId")
     .notEmpty().withMessage("National ID is required")
     .isNumeric().withMessage("National ID must be numeric")
     .isLength({ min: 14, max: 14 }).withMessage("National ID must be exactly 14 digits"),
 
+  check("birthday")
+    .notEmpty().withMessage("Birthday is required")
+    .isISO8601().withMessage("Invalid date format, use YYYY-MM-DD")
+    .custom((value) => {
+        const age = moment().diff(moment(value, "YYYY-MM-DD"), "years");
+        if (age < 18) {
+            throw new Error("User must be at least 18 years old");
+        }
+        return true;
+    }),
+    
   check("address.street")
     .optional()
     .trim(),
@@ -50,7 +58,7 @@ export const signUpValidation = [
     .optional()
     .trim(),
 
-  check("address.country")
+  check("address.governorate")
     .optional()
     .trim(),
     validatorMiddleware

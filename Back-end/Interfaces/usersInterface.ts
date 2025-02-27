@@ -1,21 +1,24 @@
-import{Document}from 'mongoose';
+import{Document,Types}from 'mongoose';
 
 type Role = 'user' | 'admin'| 'manager' ;
+type AccountType = 'current' | 'savings' | 'foreign_currency';
 export interface users extends Document{
     email: string;
     password: string;
     name: string;
-    username: string;  //bahy
+    // username: string;  
     fingerId: number;
     role: Role;
     active: boolean;
     nationalId: string;
-    cardNum: string;
+    // cardNum: string;
     address: Address[];
-    IBAN: string;
+    // IBAN: string;
     phoneNum: string;
-    cvv: string ;
+    // cvv: string ;
     balance? :number ;
+    birthday: Date;
+    accounts?: Account[];
 
 }
 
@@ -23,4 +26,8 @@ export interface Address extends Document {
   street: string ;
   city: string;
   country: string;
+}
+export interface Account {
+  _id: Types.ObjectId; 
+  type: AccountType;   
 }

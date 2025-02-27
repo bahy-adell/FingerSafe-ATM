@@ -21,8 +21,8 @@ uint32_t sensorAddress = 0xFFFFFFFF;
 
 
 
-const char* ssid = "NoInternet";       
-const char* password = "bahy015015"; 
+const char* ssid = "2024";       
+const char* password = "bahy2710"; 
 
 
 const int serverPort = 80;
@@ -159,7 +159,7 @@ void storeFingerprint(int id) {
    
   if (finger.storeModel(id) == FINGERPRINT_OK) {
     Serial.print("Fingerprint stored successfully at ID: ");
-     server.send(200, "application/json", "{ \"success\": true, \"fingerId\": " + String(id) + " }");
+    server.send(200, "application/json", "{ \"success\": true, \"fingerId\": " + String(id) + " }");
     Serial.println(id);
   } else {
     Serial.println("Failed to store fingerprint model in the database.");

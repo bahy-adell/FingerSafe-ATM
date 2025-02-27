@@ -6,7 +6,7 @@ import validatorMiddleware from "../validators/validatorMiddleware";
 const authRoute: Router = Router();
 
 authRoute.route('/signup').post(signUpValidation,signUp);
-authRoute.route('/login').post(loginValidator,login);
+authRoute.route('/login').post(login);
 authRoute.route('/loginWithFinger').post(validatorMiddleware,biometricLogin);
 
 

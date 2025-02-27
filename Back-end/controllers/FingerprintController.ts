@@ -1,7 +1,7 @@
 
 
 export const enrollFingerprint = (): Promise<number | null> => {
-    return fetch("http://192.168.61.214/enroll", {
+    return fetch(`http://${process.env.ESP_IP}/enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
     })
@@ -21,7 +21,7 @@ export const enrollFingerprint = (): Promise<number | null> => {
 }
 
 export const verifyFingerprint = (): Promise<number | null> => {
-    return fetch("http://192.168.61.214/verify", {
+    return fetch(`http://${process.env.ESP_IP}/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
     })
