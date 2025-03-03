@@ -14,6 +14,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response, next: Nex
     
    
     const fingerId = await enrollFingerprint();
+    // const fingerId =5;
     
     if (!fingerId) {
         return  next(new customErrors("Fingerprint enrollment failed no Id found",400)); 
@@ -28,7 +29,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response, next: Nex
 export const login = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise <void> => {
     
     const user = await usersModel.findOne({cardNum:req.body.cardNum});
-    if(!user || !(await bcrypt.compare(req.body.password,user.password))){
+    if(!user || !(await bcrypt.compare(req.body.PIN,user.PIN))){
         return next(new customErrors("Invalid Email or Password", 401)); 
     }
     const token = createToken(user._id);
@@ -43,7 +44,7 @@ export const biometricLogin = asyncHandler(async (req: Request, res: Response, n
         return  next(new customErrors("Fingerprint not found -auth-",400)); 
     }
     const user = await usersModel.findOne({fingerId:finger_Id});
-    if(!user || !(await bcrypt.compare(req.body.password,user.password))){
+    if(!user || !(await bcrypt.compare(req.body.password,user.PIN))){
         return next(new customErrors("Invalid Email or Password", 401)); 
     }
     const token = createToken(user._id);

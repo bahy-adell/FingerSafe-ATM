@@ -4,7 +4,7 @@ type Role = 'user' | 'admin'| 'manager' ;
 type AccountType = 'current' | 'savings' | 'foreign_currency';
 export interface users extends Document{
     email: string;
-    password: string;
+    PIN: string;
     name: string;
     // username: string;  
     fingerId: number;
@@ -17,7 +17,7 @@ export interface users extends Document{
     phoneNum: string;
     // cvv: string ;
     balance? :number ;
-    birthday: Date;
+    birthDate: Date;
     accounts?: Account[];
 
 }
@@ -25,7 +25,7 @@ export interface users extends Document{
 export interface Address extends Document {
   street: string ;
   city: string;
-  country: string;
+  governorate: string;
 }
 export interface Account {
   _id: Types.ObjectId; 

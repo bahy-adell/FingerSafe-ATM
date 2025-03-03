@@ -38,3 +38,25 @@ export const verifyFingerprint = (): Promise<number | null> => {
         return null;
     });
 }
+
+export const deleteFingerprint = (fingerId: number): Promise<boolean> => {
+    return fetch(`http://${process.env.ESP_IP}/clearOne?id=${fingerId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log(`Fingerprint ID ${fingerId} deleted successfully.`);
+            return true;
+        } else {
+            console.error(`Failed to delete fingerprint ID ${fingerId}:`, data.message);
+            return false;
+        }
+    })
+    .catch(error => {
+        console.error("Fingerprint deletion error:", error);
+        return false;
+    });
+};

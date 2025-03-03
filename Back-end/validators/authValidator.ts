@@ -18,14 +18,14 @@ export const signUpValidation = [
       return true;
     }),
 
-  check("password")
-    .notEmpty().withMessage("Password is required")
-    .isLength({  min: 6, max: 6  }).withMessage("Password  must be 6 "),  
+  check("PIN")
+    .notEmpty().withMessage("PIN is required")
+    .isLength({  min: 6, max: 6  }).withMessage("PIN  must be 6 "),  
 
-    body('confirmPassword')
+    body('confirmPIN')
         .custom((value, { req }) => {
-            if (value !== req.body.password) {
-                throw new Error('Passwords do not match');
+            if (value !== req.body.PIN) {
+                throw new Error('PINs do not match');
             }
             return true;
         }),
@@ -39,7 +39,7 @@ export const signUpValidation = [
     .isNumeric().withMessage("National ID must be numeric")
     .isLength({ min: 14, max: 14 }).withMessage("National ID must be exactly 14 digits"),
 
-  check("birthday")
+  check("birthDate")
     .notEmpty().withMessage("Birthday is required")
     .isISO8601().withMessage("Invalid date format, use YYYY-MM-DD")
     .custom((value) => {
@@ -70,8 +70,8 @@ export const  loginValidator =[
     .notEmpty().withMessage("Card number is required when using card login")
     .isCreditCard().withMessage("Invalid card number format"),
 
-  check("password")
-    .notEmpty().withMessage("Password is required")
-    .isLength({ min: 6 , max:6 }).withMessage("Password must be 6 "),
+  check("PIN")
+    .notEmpty().withMessage("PIN is required")
+    .isLength({ min: 6 , max:6 }).withMessage("PIN must be 6 "),
     validatorMiddleware
 ];

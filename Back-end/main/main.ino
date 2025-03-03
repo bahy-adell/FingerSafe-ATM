@@ -109,67 +109,83 @@ void storeFingerprint(int id) {
   }
 
   Serial.print("Storing fingerprint at ID: ");
-  server.send(200, "application/json", "{ \"success\": true, \"fingerId\": " + String(id) + " }");
   Serial.println(id);
-  
+  String jsonResponse = "{";
+
   Serial.println("Waiting for the first fingerprint scan...");
-  server.send(200, "text/plain", "Waiting for the first fingerprint scan...");
-  while (finger.getImage() != FINGERPRINT_OK);   
+  while (finger.getImage() != FINGERPRINT_OK);
   if (finger.image2Tz(1) == FINGERPRINT_OK) {
     Serial.println("First fingerprint template created.");
-    server.send(200, "text/plain", "First fingerprint template created.");
+    jsonResponse += "\"status\": \"success\", \"message\": \"First fingerprint template created.\"";
   } else {
     Serial.println("Failed to create first fingerprint template.");
-    server.send(400, "text/plain", "Failed to create first fingerprint template.");
-    return ;
+    jsonResponse += "\"status\": \"error\", \"message\": \"Failed to create first fingerprint template.\"";
+    jsonResponse += "}";
+    server.send(400, "application/json", jsonResponse);
+    return;
   }
 
-  
   Serial.println("Remove your finger and place it again.");
-  
-  delay(2000);   
+  delay(2000);
 
-  
   Serial.println("Waiting for the second fingerprint scan...");
-  
-  while (finger.getImage() != FINGERPRINT_OK);   
+  while (finger.getImage() != FINGERPRINT_OK);
   if (finger.image2Tz(2) == FINGERPRINT_OK) {
     Serial.println("Second fingerprint template created.");
-    
+    jsonResponse += ", \"message\": \"Second fingerprint template created.\"";
   } else {
     Serial.println("Failed to create second fingerprint template.");
-     
+    jsonResponse += ", \"status\": \"error\", \"message\": \"Failed to create second fingerprint template.\"";
+    jsonResponse += "}";
+    server.send(400, "application/json", jsonResponse);
     return;
   }
 
-   
   Serial.println("Creating fingerprint model...");
-  
   if (finger.createModel() == FINGERPRINT_OK) {
     Serial.println("Fingerprint model created successfully.");
-     
   } else {
     Serial.println("Failed to create fingerprint model. Ensure proper scans.");
-   
+    jsonResponse += ", \"status\": \"error\", \"message\": \"Failed to create fingerprint model.\"";
+    jsonResponse += "}";
+    server.send(400, "application/json", jsonResponse);
     return;
   }
 
- 
-  Serial.println("Storing fingerprint model in database...");
-   
-  if (finger.storeModel(id) == FINGERPRINT_OK) {
-    Serial.print("Fingerprint stored successfully at ID: ");
-    server.send(200, "application/json", "{ \"success\": true, \"fingerId\": " + String(id) + " }");
-    Serial.println(id);
-  } else {
-    Serial.println("Failed to store fingerprint model in the database.");
-     
-  }
-}
 
+  int result = finger.fingerFastSearch();
+  if (result == FINGERPRINT_OK) {
+    Serial.print("Fingerprint found with ID: ");
+    Serial.println(finger.fingerID);
+    int id = finger.fingerID;
+    // server.send(400, "application/json", "{ \"success\": false, \"fingerId\": " + String(id) + " }");
+    jsonResponse += ", \"status\": \"error\", \"message\": \"Fingerprint found\"";
+    jsonResponse += "}";
+    server.send(400, "application/json", jsonResponse);
+    Serial.print("Confidence: ");
+    Serial.println(finger.confidence);
+  } else if (result == FINGERPRINT_NOTFOUND) {
+      
+      Serial.println("Storing fingerprint model in database...");
+      if (finger.storeModel(id) == FINGERPRINT_OK) {
+        Serial.print("Fingerprint stored successfully at ID: ");
+        Serial.println(id);
+        jsonResponse += ", \"success\": true, \"fingerId\": " + String(id);
+      } else {
+        Serial.println("Failed to store fingerprint model in the database.");
+        jsonResponse += ", \"status\": \"error\", \"message\": \"Failed to store fingerprint model in the database.\"";
+      }
+
+      jsonResponse += "}";
+      server.send(200, "application/json", jsonResponse);
+
+
+
+  }
+
+}
 //***************************************************
 void searchFingerprint() {
-  // String fileName;
   Serial.println("Searching for the fingerprint...");
   while (finger.getImage() != FINGERPRINT_OK);  // Wait for a valid image
   if (finger.image2Tz(1) == FINGERPRINT_OK) {
@@ -240,7 +256,7 @@ void deleteFingerprint() {
 
     String jsonResponse = "{";
     if (result == FINGERPRINT_OK) {
-        jsonResponse += "\"status\": \"success\", \"message\": \"Fingerprint deleted successfully.\"";
+         jsonResponse += "\"success\": true, \"message\": \"Fingerprint deleted successfully.\"";
     } else if (result == FINGERPRINT_PACKETRECIEVEERR) {
         jsonResponse += "\"status\": \"error\", \"message\": \"Communication error with sensor.\"";
     } else if (result == FINGERPRINT_BADLOCATION) {
