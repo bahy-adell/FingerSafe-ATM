@@ -4,6 +4,7 @@ import database from './DB_config/database';
 import AllRoutes from './Routes';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
+import errorMiddleware from './Utils/globalError';
 
 const app : express.Application = express();
 app.use(express.json());
@@ -27,8 +28,9 @@ database();
 dotenv.config();
 
 AllRoutes(app);
+app.use(errorMiddleware);
 
-app.listen(process.env.PORT , ()=>{
+app.listen(process.env.PORT ||4000, ()=>{
    console.log(`App listen on Port : ${process.env.PORT}`) 
 });  
 

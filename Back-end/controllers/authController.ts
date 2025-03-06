@@ -7,6 +7,8 @@ import {enrollFingerprint, verifyFingerprint} from './FingerprintController';
 import customErrors from '../Utils/Errors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from "crypto";
+import { sendOTP } from '../Utils/emailService';
 
 
 
@@ -25,6 +27,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response, next: Nex
 
 
 });
+const otpStorage = new Map<string, string>();
 
 export const login = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise <void> => {
     
@@ -43,12 +46,33 @@ export const biometricLogin = asyncHandler(async (req: Request, res: Response, n
     if (!finger_Id) {
         return  next(new customErrors("Fingerprint not found -auth-",400)); 
     }
+
     const user = await usersModel.findOne({fingerId:finger_Id});
-    if(!user || !(await bcrypt.compare(req.body.password,user.PIN))){
-        return next(new customErrors("Invalid Email or Password", 401)); 
+    if (!user) {
+        return next(new customErrors("User not found", 404));
     }
-    const token = createToken(user._id);
-    res.status(201).json({ token, message : "logged in successfully with finger"});
+    // if(!user || !(await bcrypt.compare(req.body.PIN,user.PIN))){
+    //     return next(new customErrors("Invalid Email or PIN", 401)); 
+    // }
+    const otp = crypto.randomInt(100000, 999999).toString();
+    otpStorage.set(user.email, otp);
+    setTimeout(() => otpStorage.delete(user.email), 2 * 60 * 1000); //2 minutes
+
+    sendOTP(user.email, otp)
+        .then(() => {
+            res.status(200).json({ 
+                success: true,
+                message: "OTP sent successfully. Check your email.",
+                email: user.email });
+        })
+        .catch((error) => {
+            res.status(500).json({ 
+                success: false, 
+                error: "Failed to send OTP", 
+                details: error.message });
+        });
+    // const token = createToken(user._id);
+    // res.status(201).json({ token, message : "logged in successfully with finger"});
 
 });
 
@@ -75,7 +99,33 @@ export const home = asyncHandler(async (req: Request, res: Response, next: NextF
 
 });
 
-export const logout = asyncHandler(async (req: Request, res: Response) => {
-    res.clearCookie("token", { httpOnly: true , sameSite: "strict" });
-    res.json({ success: true, message: "Logged out successfully" });
-});
+// export const logout = asyncHandler(async (req: Request, res: Response) => {
+//     res.clearCookie("token", { httpOnly: true , sameSite: "strict" });
+//     res.json({ success: true, message: "Logged out successfully" });
+// });
+
+export const verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return next(new customErrors("Email and OTP are required", 400));
+    }
+
+    const storedOtp = otpStorage.get(email);
+    if (!storedOtp || storedOtp !== otp) {
+        return next(new customErrors("Invalid or expired OTP", 401));
+    }
+
+    
+    const user = await usersModel.findOne({ email });
+    if (!user) {
+        return next(new customErrors("User not found", 404));
+    }
+
+    const token = createToken(user._id);
+
+    
+    otpStorage.delete(email);
+
+    res.status(200).json({ success: true, token, message: "OTP verified, logged in successfully" });
+};
