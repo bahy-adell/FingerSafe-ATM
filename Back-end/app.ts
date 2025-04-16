@@ -4,7 +4,7 @@ import database from './DB_config/database';
 import AllRoutes from './Routes';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
-import errorMiddleware from './Utils/globalError';
+import {errorMiddleware} from './Utils/globalError';
 
 const app : express.Application = express();
 app.use(express.json());

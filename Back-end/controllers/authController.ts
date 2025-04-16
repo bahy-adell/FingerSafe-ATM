@@ -27,11 +27,12 @@ export const signUp = asyncHandler(async (req: Request, res: Response, next: Nex
 
 
 });
+
 const otpStorage = new Map<string, string>();
 
 export const login = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise <void> => {
     
-    const user = await usersModel.findOne({cardNum:req.body.cardNum});
+    const user = await usersModel.findOne({email:req.body.email});
     if(!user || !(await bcrypt.compare(req.body.PIN,user.PIN))){
         return next(new customErrors("Invalid Email or Password", 401)); 
     }
