@@ -45,7 +45,7 @@ export const biometricLogin = asyncHandler(async (req: Request, res: Response, n
     
     const finger_Id = await verifyFingerprint();
     if (!finger_Id) {
-        return  next(new customErrors("Fingerprint not found -auth-",400)); 
+        return  next(new customErrors("Fingerprint not found -auth-",400)); //eeeeeeeeeeeeeeeeeeee
     }
 
     const user = await usersModel.findOne({fingerId:finger_Id});
@@ -57,7 +57,7 @@ export const biometricLogin = asyncHandler(async (req: Request, res: Response, n
     // }
     const otp = crypto.randomInt(100000, 999999).toString();
     otpStorage.set(user.email, otp);
-    setTimeout(() => otpStorage.delete(user.email), 2 * 60 * 1000); //2 minutes
+    setTimeout(() => otpStorage.delete(user.email), 5 * 60 * 1000); //5 minutes
 
     sendOTP(user.email, otp)
         .then(() => {

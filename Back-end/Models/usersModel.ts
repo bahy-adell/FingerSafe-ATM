@@ -30,9 +30,10 @@ const usersSchema:Schema = new Schema<users>({
       {
             _id: { type: Schema.Types.ObjectId, ref: 'Account' }, 
             type: { type: String, enum: ['current', 'savings', 'foreign_currency'], required: true } 
-      } ]
-    
+      } ],
 
+     cardId: { type: Schema.Types.ObjectId, ref: "Card" },//new
+     cardFrozen:{type: Boolean , default: false} //new
 },{timestamps:true});
 
 usersSchema.pre<users>('save', async function (next) {
