@@ -13,10 +13,11 @@ export interface users extends Document{
     address: Address[];
     phoneNum: string;
     cardFrozen?: boolean;
-    balance? :number ;
+    // balance? :number ; remove it 
     birthDate: Date;
     accounts?: Account[];
     cardId?: mongoose.Types.ObjectId; //new
+    certificateId?: mongoose.Types.ObjectId[]; //new;
 
 }
 
